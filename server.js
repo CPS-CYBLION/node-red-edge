@@ -1,18 +1,20 @@
 const http = require('http');
 const express = require('express');
 const RED = require('node-red');
-const axios = require('axios').default;
+const bonjour = require('bonjour')();
+const path = require('path');
+const randomstring = require("randomstring");
+let hostname = require("os").hostname();
+
+hostname = hostname.split('.')[0];
 
 // Create an Express app
 const app = express();
-
-// Add a simple route for static content served from 'public'
-app.use('/', express.static('public'));
-
-// Create a server
 const server = http.createServer(app);
 
-// Create the settings object - see default settings.js file for other options
+app.use('/', express.static('public'));
+
+// node-red
 const settings = {
 	httpAdminRoot: '/red',
 	httpNodeRoot: '/api',
@@ -20,14 +22,205 @@ const settings = {
 	functionGlobalContext: {}, // enables global context
 };
 
-// Initialise the runtime with a server and settings
 RED.init(server, settings);
 
-// Serve the editor UI from /red
 app.use(settings.httpAdminRoot, RED.httpAdmin);
 
-// Serve the http nodes UI from /api
 app.use(settings.httpNodeRoot, RED.httpNode);
+
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+app.get('/startMDNS', (req, res) => {
+	const serviceName = `${hostname}-cipherflow-${randomstring.generate(4)}`;
+	bonjour.publish({ name: serviceName, type: 'http', port: 8000 })
+	setTimeout(() => {
+		bonjour.unpublishAll()
+	}, 300000)
+	// 5 minute
+	res.status(200).send(serviceName);
+})
+
+app.get('/stopMDNS', (req, res) => {
+	bonjour.unpublishAll(() => {
+		res.status(200).send('ok');
+	})
+})
+
+app.get('/import', (req, res) => {
+	res.sendFile(path.join(__dirname, '/public/page/import.html'));
+})
+
+app.post('/import', async (req, res) => {
+	try {
+		const { parmsBase64, publicKeyBase64 } = req.body
+		const flows = await RED.runtime.flows.getFlows({});
+
+		const timestamp = new Date().toISOString().
+			replace(/T/, ' ').
+			replace(/\..+/, '')
+
+		const contextName = 'Imported Context ' + timestamp;
+		const publicKeyName = 'Imported PublicKey ' + timestamp;
+
+		flows.flows.push({
+			id: RED.util.generateId(),
+			type: 'context',
+			name: contextName,
+			polyModulus: '8192',
+			coeffModulus: '{"value": [60, 40, 40, 60]}',
+			scale: '40',
+			sealNode: '',
+			importData: parmsBase64,
+			isUpload: true,
+		});
+
+		flows.flows.push({
+			id: RED.util.generateId(),
+			type: 'publicKey',
+			name: publicKeyName,
+			originContextNode: '',
+			publicKeyBase64: publicKeyBase64,
+			isUpload: true,
+		});
+
+		RED.runtime.flows.setFlows({
+			flows: flows,
+			deploymentType: 'full',
+		});
+
+		res.status(200).json(
+			{
+				contextNodeName: contextName,
+				publicKeyNodeName: publicKeyName
+			}
+		)
+
+	} catch (err) {
+		console.error(err)
+		res.status(400).send(err)
+	}
+
+})
+
+
+app.post('/import/context', async (req, res) => {
+	try {
+		const { parmsBase64 } = req.body
+		const flows = await RED.runtime.flows.getFlows({});
+
+		const timestamp = new Date().toISOString().
+			replace(/T/, ' ').
+			replace(/\..+/, '')
+
+		const contextName = 'Imported Context ' + timestamp;
+
+		flows.flows.push({
+			id: RED.util.generateId(),
+			type: 'context',
+			name: contextName,
+			polyModulus: '8192',
+			coeffModulus: '{"value": [60, 40, 40, 60]}',
+			scale: '40',
+			sealNode: '',
+			importData: parmsBase64,
+			isUpload: true,
+		});
+
+
+		RED.runtime.flows.setFlows({
+			flows: flows,
+			deploymentType: 'full',
+		});
+
+		res.status(200).json(
+			{
+				contextNodeName: contextName,
+			}
+		)
+
+	} catch (err) {
+		console.err(err)
+		res.status(400).send(err)
+	}
+})
+
+
+app.post('/import/publicKey', async (req, res) => {
+	try {
+		const { publicKeyBase64 } = req.body
+		const flows = await RED.runtime.flows.getFlows({});
+
+		const timestamp = new Date().toISOString().
+			replace(/T/, ' ').
+			replace(/\..+/, '')
+
+		const publicKeyName = 'Imported PublicKey ' + timestamp;
+
+		flows.flows.push({
+			id: RED.util.generateId(),
+			type: 'publicKey',
+			name: publicKeyName,
+			originContextNode: '',
+			publicKeyBase64: publicKeyBase64,
+			isUpload: true,
+		});
+
+		RED.runtime.flows.setFlows({
+			flows: flows,
+			deploymentType: 'full',
+		});
+
+		res.status(200).json(
+			{
+				publicKeyNodeName: publicKeyName
+			}
+		)
+
+	} catch (err) {
+		console.error(err)
+		res.status(400).send(err)
+	}
+})
+
+
+app.post('/import/secretKey', async (req, res) => {
+	try {
+		const { secretKeyBase64 } = req.body()
+		const flows = await RED.runtime.flows.getFlows({});
+
+		const timestamp = new Date().toISOString().
+			replace(/T/, ' ').
+			replace(/\..+/, '')
+
+		const secretKeyName = 'Imported SecretKey ' + timestamp;
+
+		flows.flows.push({
+			id: RED.util.generateId(),
+			type: 'secretKey',
+			name: secretKeyName,
+			originContextNode: '',
+			secretKeyBase64: secretKeyBase64,
+			isUpload: true,
+		});
+
+		RED.runtime.flows.setFlows({
+			flows: flows,
+			deploymentType: 'full',
+		});
+
+		res.status(200).json(
+			{
+				secretKeyNodeName: secretKeyName
+			}
+		)
+
+	} catch (err) {
+		console.error(err)
+		res.status(400).send(err)
+	}
+})
 
 app.get('/getFlows', (req, res) => {
 	RED.runtime.flows.getFlows({}).then(data => {
@@ -35,7 +228,7 @@ app.get('/getFlows', (req, res) => {
 	});
 });
 
-app.get('/addFlow', async (req, res) => {
+app.post('/addFlow', async (req, res) => {
 	const flows = await RED.runtime.flows.getFlows({});
 
 	const newConfigID = RED.util.generateId();
@@ -60,8 +253,6 @@ app.get('/addFlow', async (req, res) => {
 		publicKeyBase64: '',
 		isUpload: false,
 	});
-
-	// res.json(flows);
 
 	const newFlows = await RED.runtime.flows.setFlows({
 		flows: flows,

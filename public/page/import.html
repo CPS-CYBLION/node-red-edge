@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Cipherflow import</title>
+		<style>
+			.lds-roller {
+				display: inline-block;
+				position: relative;
+				width: 80px;
+				height: 80px;
+			}
+			.lds-roller div {
+				animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+				transform-origin: 40px 40px;
+			}
+			.lds-roller div:after {
+				content: ' ';
+				display: block;
+				position: absolute;
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: rgb(120, 120, 120);
+				margin: -4px 0 0 -4px;
+			}
+			.lds-roller div:nth-child(1) {
+				animation-delay: -0.036s;
+			}
+			.lds-roller div:nth-child(1):after {
+				top: 63px;
+				left: 63px;
+			}
+			.lds-roller div:nth-child(2) {
+				animation-delay: -0.072s;
+			}
+			.lds-roller div:nth-child(2):after {
+				top: 68px;
+				left: 56px;
+			}
+			.lds-roller div:nth-child(3) {
+				animation-delay: -0.108s;
+			}
+			.lds-roller div:nth-child(3):after {
+				top: 71px;
+				left: 48px;
+			}
+			.lds-roller div:nth-child(4) {
+				animation-delay: -0.144s;
+			}
+			.lds-roller div:nth-child(4):after {
+				top: 72px;
+				left: 40px;
+			}
+			.lds-roller div:nth-child(5) {
+				animation-delay: -0.18s;
+			}
+			.lds-roller div:nth-child(5):after {
+				top: 71px;
+				left: 32px;
+			}
+			.lds-roller div:nth-child(6) {
+				animation-delay: -0.216s;
+			}
+			.lds-roller div:nth-child(6):after {
+				top: 68px;
+				left: 24px;
+			}
+			.lds-roller div:nth-child(7) {
+				animation-delay: -0.252s;
+			}
+			.lds-roller div:nth-child(7):after {
+				top: 63px;
+				left: 17px;
+			}
+			.lds-roller div:nth-child(8) {
+				animation-delay: -0.288s;
+			}
+			.lds-roller div:nth-child(8):after {
+				top: 56px;
+				left: 12px;
+			}
+			@keyframes lds-roller {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+		<link href="/page/import.css" rel="stylesheet" />
+	</head>
+	<body>
+		<div class="flex flex-col">
+			<h1 class="text-center text-5xl mt-20 font-bold">
+				Cipherflow <label class="font-medium text-5xl"> Import</label>
+			</h1>
+			<h1 class="text-center text-2xl mt-5">
+				Import cipherflow context and public-key through wifi
+			</h1>
+			<div id="timer" class="flex-col h-32 mt-5 hidden text-gray-700">
+				<div class="flex justify-center">
+					<div class="lds-roller">
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+						<div></div>
+					</div>
+				</div>
+				<div class="flex justify-center mt-5">
+					<p>AUTO CLOSE IN</p>
+				</div>
+				<div class="flex justify-center">
+					<p>0<label id="min"></label>:<label id="second"></label> minute</p>
+				</div>
+			</div>
+			<div id="timer-placeholder" class="flex-col h-32 mt-5"></div>
+			<div class="flex justify-center mt-10">
+				<button
+					id="button-startPublish"
+					class="px-10 py-5 text-white text-xl bg-blue-500 rounded focus:outline-none"
+				>
+					Make Service Discoverable
+				</button>
+			</div>
+			<div class="flex justify-center mt-3 text-gray-500">
+				<p id="discoverName" style="display: none">
+					Discoverable as '<label id="serviceName"></label>'
+				</p>
+			</div>
+			<div class="flex justify-center mt-5">
+				<button
+					id="button-stopPublish"
+					class="px-4 py-2 text-white bg-red-500 rounded font-bold focus:outline-none hidden"
+				>
+					CANCEL
+				</button>
+			</div>
+		</div>
+	</body>
+	<script>
+		const hostname = window.location.hostname;
+		const startMin = 0.5;
+		const minElement = document.getElementById('min');
+		const secondElement = document.getElementById('second');
+		const publishButton = document.getElementById('button-startPublish');
+		const cancelButton = document.getElementById('button-stopPublish');
+
+		function reset(interval) {
+			clearInterval(interval);
+			document.getElementById('timer').classList.add('hidden');
+			document.getElementById('timer-placeholder').classList.remove('hidden');
+			document.getElementById('discoverName').style.display = 'none';
+			publishButton.disabled = false;
+			publishButton.classList.add('bg-blue-500');
+			publishButton.classList.remove('bg-blue-300');
+			cancelButton.classList.add('hidden');
+		}
+
+		document.getElementById('button-startPublish').onclick = () => {
+			fetch(`http://${hostname}:8000/startMDNS`)
+				.then(res => res.text())
+				.then(serviceName => {
+					const endTime = new Date().getTime() + startMin * 60000;
+
+					const countDownInterval = setInterval(() => {
+						const now = new Date().getTime();
+						const distance = endTime - now;
+
+						const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+						const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+						minElement.textContent = minutes;
+						secondElement.textContent = seconds < 10 ? '0' + seconds : seconds;
+
+						if (distance < 0) {
+							reset(countDownInterval);
+						}
+					});
+
+					document.getElementById('timer').classList.remove('hidden');
+					document.getElementById('timer-placeholder').classList.add('hidden');
+					document.getElementById('discoverName').style.display = 'inline';
+					document.getElementById('serviceName').textContent = serviceName;
+					publishButton.disabled = true;
+					publishButton.classList.remove('bg-blue-500');
+					publishButton.classList.add('bg-blue-300');
+					cancelButton.classList.remove('hidden');
+					cancelButton.onclick = () => {
+						fetch(`http://${hostname}:8000/stopMDNS`)
+							.then(res => res.text())
+							.then(() => {
+								reset(countDownInterval);
+							})
+							.catch(err => console.error(err));
+					};
+				})
+				.catch(err => console.error(err));
+		};
+	</script>
+</html>

@@ -91,16 +91,24 @@
 				}
 			}
 		</style>
-		<link href="/page/import.css" rel="stylesheet" />
+		<link href="./css/import.css" rel="stylesheet" />
 	</head>
 	<body>
 		<div class="flex flex-col">
 			<h1 class="text-center text-5xl mt-20 font-bold">
 				Cipherflow <label class="font-medium text-5xl"> Import</label>
 			</h1>
-			<h1 class="text-center text-2xl mt-5">
-				Import cipherflow context and public-key through wifi
+			<h1 class="text-center text-xl mt-5">
+				Import cipherflow context and public-key using qrcode
 			</h1>
+			<div class="flex justify-center">
+				<img id="qrcode" width="300" height="300" class="hidden" />
+			</div>
+
+			<h1 class="text-center text-xl font-bold hidden" id="qrcode-text">
+				scan qrcode above using cipherflow app to start import
+			</h1>
+			<div id="timer-placeholder" class="flex-col h-32 mt-5"></div>
 			<div id="timer" class="flex-col h-32 mt-5 hidden text-gray-700">
 				<div class="flex justify-center">
 					<div class="lds-roller">
@@ -121,26 +129,20 @@
 					<p>0<label id="min"></label>:<label id="second"></label> minute</p>
 				</div>
 			</div>
-			<div id="timer-placeholder" class="flex-col h-32 mt-5"></div>
 			<div class="flex justify-center mt-10">
 				<button
-					id="button-startPublish"
+					id="button-allowImport"
 					class="px-10 py-5 text-white text-xl bg-blue-500 rounded focus:outline-none"
 				>
-					Make Service Discoverable
+					CLCIK HERE TO ALLOW IMPORT
 				</button>
 			</div>
-			<div class="flex justify-center mt-3 text-gray-500">
-				<p id="discoverName" style="display: none">
-					Discoverable as '<label id="serviceName"></label>'
-				</p>
-			</div>
-			<div class="flex justify-center mt-5">
+			<div class="flex justify-center mt-10">
 				<button
-					id="button-stopPublish"
-					class="px-4 py-2 text-white bg-red-500 rounded font-bold focus:outline-none hidden"
+					id="button-denyImport"
+					class="px-10 py-5 text-white text-xl bg-red-500 rounded focus:outline-none hidden"
 				>
-					CANCEL
+					CLCIK HERE TO STOP
 				</button>
 			</div>
 		</div>
@@ -150,26 +152,26 @@
 		const startMin = 5;
 		const minElement = document.getElementById('min');
 		const secondElement = document.getElementById('second');
-		const publishButton = document.getElementById('button-startPublish');
-		const cancelButton = document.getElementById('button-stopPublish');
+		const publishButton = document.getElementById('button-allowImport');
+		const cancelButton = document.getElementById('button-denyImport');
+		const qrcode = document.getElementById('qrcode');
+		const qrcodeText = document.getElementById('qrcode-text');
 
-		function reset(interval) {
-			clearInterval(interval);
-			document.getElementById('timer').classList.add('hidden');
-			document.getElementById('timer-placeholder').classList.remove('hidden');
-			document.getElementById('discoverName').style.display = 'none';
-			publishButton.disabled = false;
-			publishButton.classList.add('bg-blue-500');
-			publishButton.classList.remove('bg-blue-300');
-			cancelButton.classList.add('hidden');
+		function stopImportHandle(countDownInterval) {
+			fetch(`http://${hostname}:8000/import/deny`)
+				.then(res => res.json())
+				.then(data => {
+					if (!data.allowImport) reset(countDownInterval);
+				})
+				.catch(err => console.error(err));
 		}
 
-		document.getElementById('button-startPublish').onclick = () => {
-			fetch(`http://${hostname}:8000/startMDNS`)
-				.then(res => res.text())
-				.then(serviceName => {
-					const endTime = new Date().getTime() + startMin * 60000;
-
+		function allowImportHandle() {
+			fetch(`http://${hostname}:8000/import/allow`)
+				.then(res => res.json())
+				.then(data => {
+					console.log('WTF');
+					const endTime = data.endTime;
 					const countDownInterval = setInterval(() => {
 						const now = new Date().getTime();
 						const distance = endTime - now;
@@ -184,25 +186,37 @@
 							reset(countDownInterval);
 						}
 					});
-
+					qrcode.src = data.qrcode;
+					qrcode.classList.remove('hidden');
+					qrcodeText.classList.remove('hidden');
 					document.getElementById('timer').classList.remove('hidden');
 					document.getElementById('timer-placeholder').classList.add('hidden');
-					document.getElementById('discoverName').style.display = 'inline';
-					document.getElementById('serviceName').textContent = serviceName;
 					publishButton.disabled = true;
 					publishButton.classList.remove('bg-blue-500');
 					publishButton.classList.add('bg-blue-300');
 					cancelButton.classList.remove('hidden');
-					cancelButton.onclick = () => {
-						fetch(`http://${hostname}:8000/stopMDNS`)
-							.then(res => res.text())
-							.then(() => {
-								reset(countDownInterval);
-							})
-							.catch(err => console.error(err));
-					};
+					cancelButton.onclick = () => stopImportHandle(countDownInterval);
 				})
 				.catch(err => console.error(err));
-		};
+		}
+
+		function reset(interval) {
+			clearInterval(interval);
+			document.getElementById('timer').classList.add('hidden');
+			document.getElementById('timer-placeholder').classList.remove('hidden');
+			publishButton.disabled = false;
+			publishButton.classList.add('bg-blue-500');
+			publishButton.classList.remove('bg-blue-300');
+			cancelButton.classList.add('hidden');
+			qrcode.classList.add('hidden');
+			qrcodeText.classList.add('hidden');
+		}
+
+		document.getElementById('button-allowImport').onclick = allowImportHandle;
+
+		if ('<%- allowImport%>' === 'true') {
+			allowImportHandle();
+			console.log('<%- allowImport%>');
+		}
 	</script>
 </html>

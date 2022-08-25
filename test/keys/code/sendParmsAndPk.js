@@ -1,5 +1,5 @@
 const axios = require('axios').default;
-const url = 'http://localhost:8000/imports'
+const url = 'http://localhost:8000/import/contextAndPublicKey'
 const fs = require('fs')
 const path = require('path')
 
@@ -9,7 +9,7 @@ const publicKeyBase64 = fs.readFileSync(path.join(__dirname, '..', 'pk.txt'), 'a
 axios.post(url, {
     parmsBase64: parmsBase64,
     publicKeyBase64: publicKeyBase64,
-    oneTimePassword: 'uQkN1jVm3sOseprmEj3dEZz670IPW7hQ2GrxV3rPSSIxsC3Hpw'
+    oneTimePassword: 'VNDZvTIQVYPeECQYmP6QwagCrBWinMngI6uVnat5S9DCzEG5C9'
 }).then(res => (
     console.log(res.data)
 )).catch(err => {

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link href="./css/index.css" rel="stylesheet" />
+	</head>
+	<body>
+		<div class="flex-col h-screen">
+			<div class="flex justify-center h-12 bg-gray-100 p-1">
+				<a href="/import">
+					<button
+						id="button-import"
+						class="w-36 border-gray-400 border-l border-r hover:bg-gray-200 font-semibold font-mono uppercase h-full"
+					>
+						Import
+					</button>
+				</a>
+				<a href="/users" class="text-center">
+					<button
+						id="button-editUser"
+						class="w-36 hover:bg-gray-300 font-bold font-mono uppercase h-full"
+					>
+						User
+					</button>
+				</a>
+				<button
+					id="button-logout"
+					class="w-36 border-gray-400 border-l border-r font-bold font-mono hover:bg-gray-300 uppercase"
+				>
+					Logout
+				</button>
+			</div>
+			<div class="flex h-full">
+				<iframe id="iframe-node_red" frameborder="0" class="w-full h-full"></iframe>
+			</div>
+		</div>
+	</body>
+	<script>
+		const token = localStorage.getItem('cipherflow_access_token');
+		if (!token) {
+			alert('Please login');
+			window.location.href = '/login';
+		}
+
+		const iframe = document.getElementById('iframe-node_red');
+		const logout = document.getElementById('button-logout');
+		const importKey = document.getElementById('button-import');
+		const editUser = document.getElementById('button-editUser');
+
+		iframe.src = `/red?access_token=${localStorage.getItem('cipherflow_access_token')}`;
+		logout.onclick = () => {
+			localStorage.removeItem('cipherflow_access_token');
+			localStorage.removeItem('cipherflow_username');
+			localStorage.removeItem('auth-tokens');
+
+			window.location.href = '/login';
+		};
+	</script>
+</html>

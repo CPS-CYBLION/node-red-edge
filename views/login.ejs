@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link href="/css/index.css" rel="stylesheet" />
+	</head>
+	<body>
+		<div
+			class="flex h-screen w-screen justify-center items-center bg-gray-300"
+		>
+			<div class="flex-col bg-white w-600px h-96 drop-shadow-xl">
+				<div
+					class="flex justify-center items-center text-gray-500 text-lg uppercase bg-gray-200 h-12 border-b border-gray-400"
+				>
+					Node-red Cipherflow Edge
+				</div>
+				<div class="flex pt-8 pb-2 pl-5 pr-5">
+					<div class="flex w-1/2 h-full">
+						<img
+							src="/red/red/images/node-red-256.svg"
+							class="h-full w-full"
+						/>
+					</div>
+					<div class="flex flex-col w-1/2 pl-5 justify-end">
+						<p class="mb-2">Username:</p>
+						<input
+							id="input-username"
+							type="text"
+							class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
+						/>
+						<p>Password:</p>
+						<input
+							id="input-password"
+							type="text"
+							class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
+						/>
+						<div class="flex">
+							<div class="flex justify-start w-1/2">
+								<p id="text-error" class="text-red-500 hidden">
+									Login Fail
+								</p>
+							</div>
+
+							<div class="flex justify-end w-1/2">
+								<button
+									id="button-login"
+									class="border border-gray-400 bg-gray-200 pt-1 pb-1 pl-4 pr-4"
+								>
+									Login
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			const login = document.getElementById("button-login");
+			login.onclick = function () {
+				login.classList.disabled = true;
+				const username =
+					document.getElementById("input-username").value;
+				const password =
+					document.getElementById("input-password").value;
+
+				const body = { username, password };
+
+				fetch("/api/auth/login", {
+					method: "POST",
+					caches: "no-cache",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					credentials: "same-origin",
+					body: JSON.stringify(body),
+				})
+					.then((res) => {
+						console.log(res.url);
+						if (res.redirected) {
+							window.location.href = res.url;
+						}
+					})
+					// .then((data) => {
+					// 	// localStorage.setItem('cipherflow_username', data.username);
+					// 	// localStorage.setItem('cipherflow_access_token', data.token);
+					// 	window.location.href = `/`;
+					// })
+					.catch((err) => {
+						document
+							.getElementById("text-error")
+							.classList.remove("hidden");
+						console.error(err);
+						login.classList.remove("cursor-not-allowed");
+						login.classList.disabled = false;
+					});
+			};
+		</script>
+	</body>
+</html>

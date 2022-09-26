@@ -1,5 +1,5 @@
-const shareData = require('../share/shared-data.js');
-const { COUNT_TIME_IN_MIN } = require('../config/import-config');
+const shareData = require('../share/shared-data');
+const { COUNT_TIME_IN_MIN } = require('../config/import');
 const hostname = require('os').hostname();
 
 const { startCountDown, endCountDown } = require('../util/countDown');
@@ -261,12 +261,13 @@ const addRelinKey = async (req, res) => {
 }
 
 module.exports = {
-    getPage,
+    // getPage,
     allowImport,
     denyImport,
     addContextAndPk,
     addContext,
     addPublicKey,
     addSecretKey,
-    addRelinKey
+    addRelinKey,
+    getPage
 }

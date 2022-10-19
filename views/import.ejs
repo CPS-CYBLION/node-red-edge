@@ -17,7 +17,7 @@
 				transform-origin: 40px 40px;
 			}
 			.lds-roller div:after {
-				content: ' ';
+				content: " ";
 				display: block;
 				position: absolute;
 				width: 7px;
@@ -126,7 +126,10 @@
 					<p>AUTO CLOSE IN</p>
 				</div>
 				<div class="flex justify-center">
-					<p>0<label id="min"></label>:<label id="second"></label> minute</p>
+					<p>
+						0<label id="min"></label>:<label id="second"></label>
+						minute
+					</p>
 				</div>
 			</div>
 			<div class="flex justify-center mt-10">
@@ -150,73 +153,82 @@
 	<script>
 		const hostname = window.location.hostname;
 		const startMin = 5;
-		const minElement = document.getElementById('min');
-		const secondElement = document.getElementById('second');
-		const publishButton = document.getElementById('button-allowImport');
-		const cancelButton = document.getElementById('button-denyImport');
-		const qrcode = document.getElementById('qrcode');
-		const qrcodeText = document.getElementById('qrcode-text');
+		const minElement = document.getElementById("min");
+		const secondElement = document.getElementById("second");
+		const publishButton = document.getElementById("button-allowImport");
+		const cancelButton = document.getElementById("button-denyImport");
+		const qrcode = document.getElementById("qrcode");
+		const qrcodeText = document.getElementById("qrcode-text");
 
 		function stopImportHandle(countDownInterval) {
 			fetch(`/api/import/deny`)
-				.then(res => res.json())
-				.then(data => {
+				.then((res) => res.json())
+				.then((data) => {
 					if (!data.allowImport) reset(countDownInterval);
 				})
-				.catch(err => console.error(err));
+				.catch((err) => console.error(err));
 		}
 
 		function allowImportHandle() {
 			fetch(`/api/import/allow`)
-				.then(res => res.json())
-				.then(data => {
-					console.log('WTF');
+				.then((res) => res.json())
+				.then((data) => {
 					const endTime = data.endTime;
 					const countDownInterval = setInterval(() => {
 						const now = new Date().getTime();
 						const distance = endTime - now;
 
-						const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-						const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+						const minutes = Math.floor(
+							(distance % (1000 * 60 * 60)) / (1000 * 60)
+						);
+						const seconds = Math.floor(
+							(distance % (1000 * 60)) / 1000
+						);
 
 						minElement.textContent = minutes;
-						secondElement.textContent = seconds < 10 ? '0' + seconds : seconds;
+						secondElement.textContent =
+							seconds < 10 ? "0" + seconds : seconds;
 
 						if (distance < 0) {
 							reset(countDownInterval);
 						}
 					});
 					qrcode.src = data.qrcode;
-					qrcode.classList.remove('hidden');
-					qrcodeText.classList.remove('hidden');
-					document.getElementById('timer').classList.remove('hidden');
-					document.getElementById('timer-placeholder').classList.add('hidden');
+					qrcode.classList.remove("hidden");
+					qrcodeText.classList.remove("hidden");
+					document.getElementById("timer").classList.remove("hidden");
+					document
+						.getElementById("timer-placeholder")
+						.classList.add("hidden");
 					publishButton.disabled = true;
-					publishButton.classList.remove('bg-blue-500');
-					publishButton.classList.add('bg-blue-300');
-					cancelButton.classList.remove('hidden');
-					cancelButton.onclick = () => stopImportHandle(countDownInterval);
+					publishButton.classList.remove("bg-blue-500");
+					publishButton.classList.add("bg-blue-300");
+					cancelButton.classList.remove("hidden");
+					cancelButton.onclick = () =>
+						stopImportHandle(countDownInterval);
 				})
-				.catch(err => console.error(err));
+				.catch((err) => console.error(err));
 		}
 
 		function reset(interval) {
 			clearInterval(interval);
-			document.getElementById('timer').classList.add('hidden');
-			document.getElementById('timer-placeholder').classList.remove('hidden');
+			document.getElementById("timer").classList.add("hidden");
+			document
+				.getElementById("timer-placeholder")
+				.classList.remove("hidden");
 			publishButton.disabled = false;
-			publishButton.classList.add('bg-blue-500');
-			publishButton.classList.remove('bg-blue-300');
-			cancelButton.classList.add('hidden');
-			qrcode.classList.add('hidden');
-			qrcodeText.classList.add('hidden');
+			publishButton.classList.add("bg-blue-500");
+			publishButton.classList.remove("bg-blue-300");
+			cancelButton.classList.add("hidden");
+			qrcode.classList.add("hidden");
+			qrcodeText.classList.add("hidden");
 		}
 
-		document.getElementById('button-allowImport').onclick = allowImportHandle;
+		document.getElementById("button-allowImport").onclick =
+			allowImportHandle;
 
-		if ('<%- allowImport%>' === 'true') {
+		if ("<%- allowImport%>" === "true") {
 			allowImportHandle();
-			console.log('<%- allowImport%>');
 		}
 
 		// allowImportHandle();

@@ -15,8 +15,6 @@ const login = async (req, res) => {
             return;
         }
 
-
-
         const user = accounts.find((account => {
             return account.username === username
         }))
@@ -27,12 +25,8 @@ const login = async (req, res) => {
         }
 
         if (user && (await bcrypt.compare(password, user.password))) {
-
-            console.log('wtf');
-
-            req.session.user = { username: user.username }
-
-            res.redirect(302, '/');
+            req.session.user = user
+            res.redirect('/');
             return
         }
 
@@ -46,7 +40,7 @@ const login = async (req, res) => {
 const logout = (req, res) => {
     req.session.destroy((err) => {
         if (!err) {
-            res.redirect
+            res.redirect('/auth/login')
         } else {
             console.error(err)
             res.statue(500).send('Logout Fail');

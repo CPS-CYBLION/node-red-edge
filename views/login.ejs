@@ -20,7 +20,7 @@
 				<div class="flex pt-8 pb-2 pl-5 pr-5">
 					<div class="flex w-1/2 h-full">
 						<img
-							src="/red/red/images/node-red-256.svg"
+							src="/images/node-red-256.svg"
 							class="h-full w-full"
 						/>
 					</div>
@@ -34,7 +34,7 @@
 						<p>Password:</p>
 						<input
 							id="input-password"
-							type="text"
+							type="password"
 							class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
 						/>
 						<div class="flex">
@@ -78,9 +78,10 @@
 					body: JSON.stringify(body),
 				})
 					.then((res) => {
-						console.log(res.url);
 						if (res.redirected) {
 							window.location.href = res.url;
+						} else {
+							throw res;
 						}
 					})
 					// .then((data) => {

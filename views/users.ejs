@@ -4,157 +4,279 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
+		<title>Coper Edge</title>
 		<link href="./css/index.css" rel="stylesheet" />
+		<style>
+			html {
+				background-color: rgb(229 231 235);
+			}
+		</style>
 	</head>
 	<body>
-		<div class="flex flex-col justify-center items-center mt-20">
-			<h2 class="uppercase text-xl font-bold mb-10">Users Details</h2>
+		<div class="flex flex-col h-full w-full items-center bg-gray-200">
+			<div
+				class="flex-col min-w-max: w-96 mt-24 mb-16 text-2xl font-semibold font-serif"
+			>
+				<div class="flex flex-nowrap mb-5">
+					<h1 class="w-1/2">Edge Name&nbsp;&nbsp;&nbsp;:</h1>
+					<h1 class="w-1/2 font-medium">Cipherflow Edge</h1>
+				</div>
 
-			<table id="table-users" class="table-fixed border text-center w-96">
-				<thead class="border-b">
-					<tr>
-						<th class="text-sm font-medium text-gray-900 px-6 py-4 border-r">No.</th>
-						<th class="text-sm font-medium text-gray-900 px-6 py-4 border-r">User</th>
-						<th>Edit</th>
-					</tr>
-				</thead>
-				<tbody id="table-users-body" class="border-b"></tbody>
-			</table>
-
-			<div class="flex flex-col w-98 pl-5 justify-center mt-10">
-				<h2 class="uppercase text-lg font-bold text-center mb-5">Create New User</h2>
-				<p class="mb-2">Username:</p>
-				<input
-					id="input-username"
-					type="text"
-					class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
-				/>
-				<p>Password:</p>
-				<input
-					id="input-password"
-					type="text"
-					class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
-				/>
-				<div class="flex">
-					<div class="flex justify-start w-1/2">
-						<p id="text-error" class="text-red-500 hidden">Create Fail</p>
-					</div>
-
-					<div class="flex justify-end w-1/2">
-						<button
-							id="button-create"
-							class="border border-gray-400 bg-gray-200 pt-1 pb-1 pl-4 pr-4"
-						>
-							Create
-						</button>
-					</div>
+				<div class="flex flex-nowrap">
+					<h1 class="w-1/2">
+						Username&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+					</h1>
+					<h1 id="text-username" class="w-1/2 font-medium">
+						<%= username %>
+					</h1>
 				</div>
 			</div>
+			<div class="mb-3">
+				<button
+					id="button-edgeName"
+					class="drop-shadow-xl bg-gray-50 px-3 py-2 border border-gray-200"
+				>
+					Change Edge Name
+				</button>
+			</div>
+			<div class="flex mb-16">
+				<button
+					id="button-username"
+					class="drop-shadow-xl bg-gray-50 px-3 py-2 mr-5 border border-gray-200"
+				>
+					Change Username
+				</button>
+
+				<button
+					id="button-userPassword"
+					class="drop-shadow-xl bg-gray-50 px-3 py-2 border border-gray-200"
+				>
+					Change User Password
+				</button>
+			</div>
+			<h1 id="error-text" class="text-xl text-red-500 mb-16">&nbsp;</h1>
+			<div
+				id="form-edgeName"
+				class="flex flex-col w-96 drop-shadow-xl p-5 bg-gray-50 mb-5 hidden"
+			>
+				<h1 class="mb-5 text-center text-xl font-serif">
+					Change Edge Name
+				</h1>
+				<label class="mb-3">New Edge Name</label>
+				<input
+					id="input-edgeName"
+					class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
+				/>
+				<button
+					id="button-applyEdgeName"
+					class="border border-gray-500 bg-gray-300 px-3 py-2"
+				>
+					Apply
+				</button>
+			</div>
+
+			<div
+				id="form-username"
+				class="flex flex-col w-96 drop-shadow-xl p-5 bg-gray-50 mb-5 hidden"
+			>
+				<h1 class="mb-5 text-center text-xl font-serif">
+					Change Username
+				</h1>
+				<label class="mb-3">New Username</label>
+				<input
+					id="input-username"
+					class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
+				/>
+				<button
+					id="button-applyUsername"
+					class="border border-gray-500 bg-gray-300 px-3 py-2"
+				>
+					Apply
+				</button>
+			</div>
+
+			<div
+				id="form-userPassword"
+				class="flex flex-col w-96 drop-shadow-xl p-5 bg-gray-50 mb-28 hidden"
+			>
+				<h1 class="mb-5 text-center text-xl font-serif">
+					Change User Password
+				</h1>
+				<label class="mb-3">Old Password</label>
+				<input
+					id="input-oldUserPassword"
+					class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
+					type="password"
+				/>
+				<label class="mb-3">New Password</label>
+				<input
+					id="input-newUserPassword"
+					class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
+					type="password"
+				/>
+				<label class="mb-3">Confirm Password</label>
+				<input
+					id="input-newUserPasswordAgain"
+					class="mb-4 border-gray-200 border rounded w-full h-9 pl-2"
+					type="password"
+				/>
+				<button
+					id="button-applyUserPassword"
+					class="border border-gray-500 bg-gray-300 px-3 py-2"
+				>
+					Apply
+				</button>
+			</div>
 		</div>
-	</body>
-	<script>
-		const token = localStorage.getItem('cipherflow_access_token');
-		if (!token) {
-			alert('Please login');
-			window.location.href = '/login';
-		}
-
-		const table = document.getElementById('table-users-body');
-		const create = document.getElementById('button-create');
-
-		fetchUsers();
-		create.onclick = createHandle;
-
-		function editUserHandle(username) {}
-
-		function createNewUserRow(user, i) {
-			const newUserRow = document.createElement('tr');
-			const number = document.createElement('th');
-			const username = document.createElement('th');
-			const editButton = document.createElement('button');
-			number.classList.add(
-				'text-sm',
-				'font-medium',
-				'text-gray-900',
-				'px-6',
-				'py-4',
-				'border-r',
-				'whitespace-nowrap',
+		<script>
+			const buttonEdgeName = document.getElementById("button-edgeName");
+			const buttonUsername = document.getElementById("button-username");
+			const buttonUserPassword = document.getElementById(
+				"button-userPassword"
 			);
-			username.classList.add(
-				'text-sm',
-				'font-medium',
-				'text-gray-900',
-				'px-6',
-				'py-4',
-				'border-r',
-				'whitespace-nowrap',
+			const formEdgeName = document.getElementById("form-edgeName");
+			const formUsername = document.getElementById("form-username");
+			const fromUserPassword =
+				document.getElementById("form-userPassword");
+			const buttonApplyEdgeName = document.getElementById(
+				"button-applyEdgeName"
 			);
-			editButton.classList.add(
-				'text-sm',
-				'font-medium',
-				'text-gray-900',
-				'pl-4',
-				'pr-4',
-				'mx-6',
-				'my-4',
-				'border',
-				'hover:bg-gray-200',
+			const buttonApplyUsername = document.getElementById(
+				"button-applyUsername"
 			);
-			newUserRow.classList.add('border-b');
-			number.textContent = i;
-			username.textContent = user.username;
-			editButton.textContent = 'Edit';
-			newUserRow.appendChild(number);
-			newUserRow.appendChild(username);
-			newUserRow.appendChild(editButton);
-			table.appendChild(newUserRow);
-		}
+			const buttonApplyUserPassword = document.getElementById(
+				"button-applyUserPassword"
+			);
 
-		function fetchUsers() {
-			fetch('/api/users', {
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			})
-				.then(res => res.json())
-				.then(users => {
-					users.forEach((user, i) => {
-						createNewUserRow(user, i + 1);
+			buttonEdgeName.onclick = () => {
+				formEdgeName.classList.remove("hidden");
+				formUsername.classList.add("hidden");
+				fromUserPassword.classList.add("hidden");
+			};
+
+			buttonUsername.onclick = () => {
+				formEdgeName.classList.add("hidden");
+				formUsername.classList.remove("hidden");
+				fromUserPassword.classList.add("hidden");
+			};
+
+			buttonUserPassword.onclick = () => {
+				formEdgeName.classList.add("hidden");
+				formUsername.classList.add("hidden");
+				fromUserPassword.classList.remove("hidden");
+			};
+
+			function errorText(errorText) {
+				const errorElement = document.getElementById("error-text");
+				errorElement.innerHTML = errorText;
+			}
+			function changeEdgeNameHandle() {}
+
+			function changeUsernameHandle() {
+				buttonApplyUsername.disabled = true;
+				const newUsername = document
+					.getElementById("input-username")
+					.value.trim();
+
+				if (!newUsername) {
+					errorText("Please Enter New Username");
+					buttonApplyUsername.disabled = false;
+					return;
+				}
+
+				fetch("/api/users/username", {
+					method: "POST",
+					cache: "no-cache",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					credentials: "same-origin",
+					body: JSON.stringify({
+						newUsername: newUsername,
+					}),
+				})
+					.then((res) => {
+						if (res.ok) {
+							return res.json();
+						} else {
+							throw res.text();
+						}
+					})
+					.then((data) => {
+						document.getElementById("text-username").innerText =
+							data.newUsername;
+						errorText(" ");
+						buttonApplyUsername.disabled = false;
+						formUsername.classList.add("hidden");
+					})
+					.catch((err) => {
+						err.then((errText) => {
+							console.error(errText);
+							errorText(errText);
+							buttonApplyUsername.disabled = false;
+						});
 					});
+			}
+
+			function changeUserPasswordHandle() {
+				buttonApplyUserPassword.disabled = true;
+				const newPassword = document.getElementById(
+					"input-newUserPassword"
+				).value;
+				const newPasswordAgain = document.getElementById(
+					"input-newUserPasswordAgain"
+				).value;
+				const oldPassword = document.getElementById(
+					"input-oldUserPassword"
+				).value;
+
+				if (newPassword !== newPasswordAgain) {
+					errorText("new password did't match");
+					buttonApplyUserPassword.disabled = false;
+					return;
+				}
+
+				function clearPasswordInput() {
+					document.getElementById("input-newUserPassword").value = "";
+					document.getElementById(
+						"input-newUserPasswordAgain"
+					).value = "";
+					document.getElementById("input-oldUserPassword").value = "";
+				}
+
+				fetch("/api/users/password", {
+					method: "POST",
+					cache: "no-cache",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						oldPassword: oldPassword,
+						newPassword: newPassword,
+					}),
+					credentials: "same-origin",
 				})
-				.catch(err => {
-					console.error(err);
-				});
-		}
+					.then((res) => {
+						if (res.ok) return res.json();
+						else throw res.text();
+					})
+					.then((data) => {
+						errorText("&nbsp;");
+						buttonApplyUserPassword.disabled = false;
+						fromUserPassword.classList.add("hidden");
+						clearPasswordInput();
+					})
+					.catch((err) => {
+						err.then((errText) => {
+							console.error(errText);
+							errorText(errText);
+							buttonApplyUserPassword.disabled = false;
+						});
+					});
+			}
 
-		function createHandle() {
-			create.classList.disabled = true;
-			const username = document.getElementById('input-username').value;
-			const password = document.getElementById('input-password').value;
-
-			const body = { username, password };
-
-			fetch('api/users', {
-				method: 'POST',
-				caches: 'no-cache',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify(body),
-			})
-				.then(res => res.json())
-				.then(user => {
-					window.location.reload();
-				})
-				.catch(err => {
-					document.getElementById('text-error').classList.remove('hidden');
-					console.error(err);
-					create.classList.disabled = false;
-				});
-		}
-	</script>
+			buttonApplyUsername.onclick = changeUsernameHandle;
+			buttonApplyUserPassword.onclick = changeUserPasswordHandle;
+		</script>
+	</body>
 </html>

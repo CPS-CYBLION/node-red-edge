@@ -2,11 +2,34 @@ const bcrypt = require('bcrypt');
 const readAccount = require('../util/readAccount');
 const writeAccount = require('../util/writeAccount');
 const { SALT_ROUNDS } = require('../config/express');
+const validator = require('validator');
 
-const getPage = (req, res) => {
-    res.render('users', {
+function validatePassword(password) {
+    if (!validator.isAlphanumeric(password)) {
+        return { error: true, message: "password can't only contain [a-z, A-Z, 0-9]" }
+    }
 
-    })
+    if (!validator.isLength(password, {
+        min: 5, max: 20
+    })) {
+        return { error: true, message: "password length between 5 - 20" }
+    }
+
+    return { error: false }
+}
+
+function validateUsername(username) {
+    if (!validator.isAlphanumeric(username)) {
+        return { error: true, message: "username can't only contain [a-z, A-Z, 0-9]" }
+    }
+
+    if (!validator.isLength(username, {
+        min: 5, max: 10
+    })) {
+        return { error: true, message: "username length between 5 - 10" }
+    }
+
+    return { error: false }
 }
 
 const getUsers = (req, res) => {
@@ -18,62 +41,37 @@ const getUsers = (req, res) => {
     res.status(200).json(accounts);
 }
 
-const newUser = async (req, res) => {
-    const { username, password } = req.body
-    if (!(username && password)) {
-        res.status(400).send('all input is required');
-        return
-    }
+const getPage = (req, res) => {
+    const username = req.session.user.username
 
-    // if (req.userData.username !== 'admin') {
-    //     res.status(400).send("only admin can create new account");
-    //     return
-    // }
-
-    const accounts = readAccount();
-
-    const account = accounts.find((account => {
-        return account.username === username
-    }))
-
-    if (account) {
-        res.status(400).send(`already have account name ${username}`);
-        return
-    }
-
-    const hashPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const newAccount = { username: username, password: hashPassword }
-    accounts.push(newAccount);
-
-    writeAccount(accounts);
-
-    res.status(201).json({
-        username: username,
-        password: password,
-        users: accounts
-    });
+    res.render('users', {
+        username: username
+    })
 }
 
 const editPassword = async (req, res) => {
-    const { editUsername, newPassword } = req.body
-    if (!(editUsername && newPassword)) {
+    const { oldPassword, newPassword } = req.body
+    if (!(oldPassword && newPassword)) {
         res.status(400).send('all input is required');
         return
     }
 
-    // if (req.userData.username !== editUsername && req.userData.username !== 'admin') {
-    //     res.status(400).send("can't edit another account username");
-    //     return
-    // }
-
-
+    const validateResult = validatePassword(newPassword)
+    if (validateResult.error) {
+        res.status(400).send(validateResult.message)
+        return
+    }
 
     const accounts = readAccount();
-    const account = accounts.find((account => {
-        return account.username === editUsername
-    }))
+    const account = accounts[0];
+
     if (!account) {
-        res.status(400).send(`no account name ${editUsername}`);
+        res.status(500).send(`no account`);
+        return
+    }
+
+    if (! await bcrypt.compare(oldPassword, account.password)) {
+        res.status(400).send('old password didn\'t match')
         return
     }
 
@@ -81,29 +79,29 @@ const editPassword = async (req, res) => {
     account.password = hashPassword;
     writeAccount(accounts);
 
-    res.status(200).json({ editUsername: editUsername, newPassword: newPassword });
+    res.status(200).json({ username: account.username, newPassword: newPassword });
 }
 
 const editUsername = (req, res) => {
-    const { editUsername, newUsername } = req.body
-    if (!(editUsername && newUsername)) {
+    const { newUsername } = req.body
+    if (!(newUsername)) {
         res.status(400).send('all input is required');
         return
     }
 
-    // if (req.userData.username !== editUsername && req.userData.username !== 'admin') {
-    //     res.status(400).send("can't edit another account username");
-    //     return
-    // }
+    const validateResult = validateUsername(newUsername);
+    if (validateResult.error) {
+        res.status(400).send(validateResult.message)
+        return
+    }
 
     const accounts = readAccount();
 
-    const account = accounts.find((account => {
-        return account.username === editUsername
-    }))
+    const account = accounts[0];
+    const oldUsername = account.username;
 
     if (!account) {
-        res.status(400).send(`no account name ${editUsername}`);
+        res.status(400).send(`no account`);
         return
     }
 
@@ -113,10 +111,10 @@ const editUsername = (req, res) => {
 
     res.status(200).json({
         newUsername: account.username,
-        oldUsername: editUsername,
+        oldUsername: oldUsername,
     });
 }
 
 module.exports = {
-    editPassword, editUsername, newUser, getUsers, getPage
+    editPassword, editUsername, getUsers, getPage
 }

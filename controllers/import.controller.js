@@ -1,19 +1,19 @@
-const shareData = require('../share/shared-data');
-const { COUNT_TIME_IN_MIN } = require('../config/import');
-const hostname = require('os').hostname();
+const shareData = require("../share/shared-data");
+const { COUNT_TIME_IN_MIN } = require("../config/import");
+const hostname = require("os").hostname();
 
-const { startCountDown, endCountDown } = require('../util/countDown');
-const generateQRcode = require('../util/generateQRcode');
-const newPassword = require('../util/generatePassword');
-const getIPAddress = require('../util/getIPAddress');
+const { startCountDown, endCountDown } = require("../util/countDown");
+const generateQRcode = require("../util/generateQRcode");
+const newPassword = require("../util/generatePassword");
+const getIPAddress = require("../util/getIPAddress");
 
-const RED = require('node-red');
+const RED = require("node-red");
 
 const getPage = (req, res) => {
-    res.render('import', {
-        allowImport: shareData.allowImport
-    })
-}
+    res.render("import", {
+        allowImport: shareData.allowImport,
+    });
+};
 
 const allowImport = async (req, res) => {
     if (!shareData.allowImport) {
@@ -22,9 +22,10 @@ const allowImport = async (req, res) => {
         const qrcodeDataJSON = {
             hostname: hostname,
             hostIP: getIPAddress(),
-            endPoint: '/import/contextAndPublicKey',
-            oneTimePassword: shareData.oneTimePassword
-        }
+            endPoint: "/import/addPublicKeyAndDeviceID",
+            oneTimePassword: shareData.oneTimePassword,
+            port: "8080",
+        };
 
         shareData.qrcode = await generateQRcode(qrcodeDataJSON);
         shareData.allowImport = true;
@@ -33,232 +34,286 @@ const allowImport = async (req, res) => {
         shareData.countDownInterval = countObj.countDownInterval;
         shareData.endTime = countObj.endTime;
 
-
         res.json({
             allowImport: shareData.allowImport,
             endTime: shareData.endTime,
-            qrcode: shareData.qrcode
-        })
+            qrcode: shareData.qrcode,
+        });
     } else {
         res.json({
             allowImport: shareData.allowImport,
             endTime: shareData.endTime,
-            qrcode: shareData.qrcode
-        })
+            qrcode: shareData.qrcode,
+        });
     }
-}
+};
 
 const denyImport = (req, res) => {
     shareData.allowImport = false;
     endCountDown(shareData.countDownInterval);
     res.json({
         allowImport: shareData.allowImport,
-    })
-}
+    });
+};
 
 const addContextAndPk = async (req, res) => {
     try {
-        const { parmsBase64, publicKeyBase64 } = req.body
+        const { parmsBase64, publicKeyBase64 } = req.body;
 
         const flows = await RED.runtime.flows.getFlows({});
 
-        const timestamp = new Date().toISOString().
-            replace(/T/, ' ').
-            replace(/\..+/, '')
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
 
-        const contextName = 'Imported Context ' + timestamp;
-        const publicKeyName = 'Imported PublicKey ' + timestamp;
+        const contextName = "Imported Context " + timestamp;
+        const publicKeyName = "Imported PublicKey " + timestamp;
 
         flows.flows.push({
             id: RED.util.generateId(),
-            type: 'context',
+            type: "context",
             name: contextName,
-            polyModulus: '8192',
+            polyModulus: "8192",
             coeffModulus: '{"value": [60, 40, 40, 60]}',
-            scale: '40',
-            sealNode: '',
+            scale: "40",
+            sealNode: "",
             importData: parmsBase64,
             isUpload: true,
         });
 
         flows.flows.push({
             id: RED.util.generateId(),
-            type: 'publicKey',
+            type: "publicKey",
             name: publicKeyName,
-            originContextNode: '',
+            originContextNode: "",
             importData: publicKeyBase64,
             isUpload: true,
         });
 
         RED.runtime.flows.setFlows({
             flows: flows,
-            deploymentType: 'full',
+            deploymentType: "full",
         });
 
-        res.status(200).json(
-            {
-                contextNodeName: contextName,
-                publicKeyNodeName: publicKeyName
-            }
-        )
-
+        res.status(200).json({
+            contextNodeName: contextName,
+            publicKeyNodeName: publicKeyName,
+        });
     } catch (err) {
-        console.error(err)
-        res.status(400).send(err)
+        console.error(err);
+        res.status(400).send(err);
     }
-}
+};
 
 const addContext = async (req, res) => {
     try {
-        const { parmsBase64 } = req.body
+        const { parmsBase64 } = req.body;
         const flows = await RED.runtime.flows.getFlows({});
 
-        const timestamp = new Date().toISOString().
-            replace(/T/, ' ').
-            replace(/\..+/, '')
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
 
-        const contextName = 'Imported Context ' + timestamp;
+        const contextName = "Imported Context " + timestamp;
 
         flows.flows.push({
             id: RED.util.generateId(),
-            type: 'context',
+            type: "context",
             name: contextName,
-            polyModulus: '8192',
+            polyModulus: "8192",
             coeffModulus: '{"value": [60, 40, 40, 60]}',
-            scale: '40',
-            sealNode: '',
+            scale: "40",
+            sealNode: "",
             importData: parmsBase64,
             isUpload: true,
         });
 
-
         RED.runtime.flows.setFlows({
             flows: flows,
-            deploymentType: 'full',
+            deploymentType: "full",
         });
 
-        res.status(200).json(
-            {
-                contextNodeName: contextName,
-            }
-        )
-
+        res.status(200).json({
+            contextNodeName: contextName,
+        });
     } catch (err) {
-        console.err(err)
-        res.status(400).send(err)
+        console.err(err);
+        res.status(400).send(err);
     }
-}
+};
 
 const addPublicKey = async (req, res) => {
     try {
-        const { publicKeyBase64 } = req.body
+        const { publicKeyBase64 } = req.body;
         const flows = await RED.runtime.flows.getFlows({});
 
-        const timestamp = new Date().toISOString().
-            replace(/T/, ' ').
-            replace(/\..+/, '')
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
 
-        const publicKeyName = 'Imported PublicKey ' + timestamp;
+        const publicKeyName = "Imported PublicKey " + timestamp;
 
         flows.flows.push({
             id: RED.util.generateId(),
-            type: 'publicKey',
+            type: "publicKey",
             name: publicKeyName,
-            originContextNode: '',
+            originContextNode: "",
             publicKeyBase64: publicKeyBase64,
             isUpload: true,
         });
 
         RED.runtime.flows.setFlows({
             flows: flows,
-            deploymentType: 'full',
+            deploymentType: "full",
         });
 
-        res.status(200).json(
-            {
-                publicKeyNodeName: publicKeyName
-            }
-        )
-
+        res.status(200).json({
+            publicKeyNodeName: publicKeyName,
+        });
     } catch (err) {
-        console.error(err)
-        res.status(400).send(err)
+        console.error(err);
+        res.status(400).send(err);
     }
-}
+};
 
 const addSecretKey = async (req, res) => {
     try {
-        const { secretKeyBase64 } = req.body
+        const { secretKeyBase64 } = req.body;
         const flows = await RED.runtime.flows.getFlows({});
 
-        const timestamp = new Date().toISOString().
-            replace(/T/, ' ').
-            replace(/\..+/, '')
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
 
-        const secretKeyName = 'Imported SecretKey ' + timestamp;
+        const secretKeyName = "Imported SecretKey " + timestamp;
 
         flows.flows.push({
             id: RED.util.generateId(),
-            type: 'secretKey',
+            type: "secretKey",
             name: secretKeyName,
-            originContextNode: '',
+            originContextNode: "",
             importData: secretKeyBase64,
             isUpload: true,
         });
 
         RED.runtime.flows.setFlows({
             flows: flows,
-            deploymentType: 'full',
+            deploymentType: "full",
         });
 
-        res.status(200).json(
-            {
-                secretKeyNodeName: secretKeyName
-            }
-        )
-
+        res.status(200).json({
+            secretKeyNodeName: secretKeyName,
+        });
     } catch (err) {
-        console.error(err)
-        res.status(400).send(err)
+        console.error(err);
+        res.status(400).send(err);
     }
-}
+};
 
 const addRelinKey = async (req, res) => {
     try {
-        const { relinKeyBase64 } = req.body
+        const { relinKeyBase64 } = req.body;
         const flows = await RED.runtime.flows.getFlows({});
 
-        const timestamp = new Date().toISOString().
-            replace(/T/, ' ').
-            replace(/\..+/, '')
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
 
-        const relinKeyName = 'Imported RelinKey ' + timestamp;
+        const relinKeyName = "Imported RelinKey " + timestamp;
 
         flows.flows.push({
             id: RED.util.generateId(),
-            type: 'relinKey',
+            type: "relinKey",
             name: relinKeyName,
-            originContextNode: '',
+            originContextNode: "",
             importData: relinKeyBase64,
             isUpload: true,
         });
 
         RED.runtime.flows.setFlows({
             flows: flows,
-            deploymentType: 'full',
+            deploymentType: "full",
         });
 
-        res.status(200).json(
-            {
-                relinKeyNodeName: relinKeyName
-            }
-        )
-
+        res.status(200).json({
+            relinKeyNodeName: relinKeyName,
+        });
     } catch (err) {
-        console.error(err)
-        res.status(400).send(err)
+        console.error(err);
+        res.status(400).send(err);
     }
-}
+};
+
+const addPublicKeyAndDeviceID = async (req, res) => {
+    try {
+        const { publicKey, netpieDevice } = req.body;
+        const flows = await RED.runtime.flows.getFlows({});
+
+        flows.flows.push({
+            id: RED.util.generateId(),
+            type: "mqtt-broker",
+            name: "fhe.netpie.io",
+            broker: "mqtt.netpie.io",
+            port: "1883",
+            clientid: netpieDevice.client_id,
+            autoConnect: true,
+            usetls: false,
+            protocolVersion: "4",
+            keepalive: "60",
+            cleansession: true,
+            birthTopic: "",
+            birthQos: "0",
+            birthPayload: "",
+            birthMsg: {},
+            closeTopic: "",
+            closeQos: "0",
+            closePayload: "",
+            closeMsg: {},
+            willTopic: "",
+            willQos: "0",
+            willPayload: "",
+            willMsg: {},
+            sessionExpiry: "",
+            credentials: {
+                user: netpieDevice.token,
+                password: netpieDevice.secret,
+            },
+        });
+
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
+
+        const publicKeyName = "Imported PublicKey " + timestamp;
+
+        flows.flows.push({
+            id: RED.util.generateId(),
+            type: "publicKey",
+            name: publicKeyName,
+            originContextNode: "",
+            publicKeyBase64: publicKey,
+            isUpload: true,
+        });
+
+        RED.runtime.flows.setFlows({
+            flows: flows,
+            deploymentType: "full",
+        });
+
+        res.status(200).json({
+            publicKeyNodeName: publicKeyName,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(400).send(err);
+    }
+};
 
 module.exports = {
     // getPage,
@@ -269,5 +324,6 @@ module.exports = {
     addPublicKey,
     addSecretKey,
     addRelinKey,
-    getPage
-}
+    getPage,
+    addPublicKeyAndDeviceID,
+};

@@ -9,7 +9,7 @@
 	</head>
 	<body>
 		<div class="flex-col h-screen">
-			<div class="flex justify-center h-12 bg-gray-100 p-1">
+			<div class="flex justify-center bg-gray-100 p-1" style="height: 5%">
 				<a href="/import">
 					<button
 						id="button-import"
@@ -33,30 +33,33 @@
 					Logout
 				</button>
 			</div>
-			<div class="flex h-full">
-				<iframe id="iframe-node_red" frameborder="0" class="w-full h-full"></iframe>
+			<div class="flex" style="height: 95%">
+				<iframe
+					src="/red"
+					id="iframe-node_red"
+					frameborder="0"
+					class="w-full h-full"
+				></iframe>
 			</div>
 		</div>
 	</body>
 	<script>
-		const token = localStorage.getItem('cipherflow_access_token');
-		if (!token) {
-			alert('Please login');
-			window.location.href = '/login';
-		}
+		const iframe = document.getElementById("iframe-node_red");
+		const logout = document.getElementById("button-logout");
+		const importKey = document.getElementById("button-import");
+		const editUser = document.getElementById("button-editUser");
 
-		const iframe = document.getElementById('iframe-node_red');
-		const logout = document.getElementById('button-logout');
-		const importKey = document.getElementById('button-import');
-		const editUser = document.getElementById('button-editUser');
-
-		iframe.src = `/red?access_token=${localStorage.getItem('cipherflow_access_token')}`;
 		logout.onclick = () => {
-			localStorage.removeItem('cipherflow_access_token');
-			localStorage.removeItem('cipherflow_username');
-			localStorage.removeItem('auth-tokens');
-
-			window.location.href = '/login';
+			fetch("/api/auth/logout")
+				.then((res) => {
+					console.log(res);
+					if (res.redirected) {
+						window.location.href = res.url;
+					}
+				})
+				.catch((err) => {
+					console.error(err);
+				});
 		};
 	</script>
 </html>

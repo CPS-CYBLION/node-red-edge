@@ -1,16 +1,26 @@
-const importController = require('../controllers/import.controller.js');
-const allowImportMiddle = require('../middleware/allowImport.middleware.js');
-const apiRouter = require('express').Router()
-const httpRouter = require('express').Router()
+const importController = require("../controllers/import.controller.js");
+const authMiddleware = require("../middleware/auth.middleware");
+const allowImportMiddle = require("../middleware/allowImport.middleware.js");
+const apiRouter = require("express").Router();
+const httpRouter = require("express").Router();
 
-httpRouter.get('/', importController.getPage)
+httpRouter.get("/", authMiddleware, importController.getPage);
 
-apiRouter.get('/allow', importController.allowImport);
-apiRouter.get('/deny', importController.denyImport);
-apiRouter.post('/contextAndPublicKey', allowImportMiddle, importController.addContextAndPk);
-apiRouter.post('/context', allowImportMiddle, importController.addContext);
-apiRouter.post('/publicKey', allowImportMiddle, importController.addPublicKey);
-apiRouter.post('/secretKey', allowImportMiddle, importController.addSecretKey);
-apiRouter.post('/relinKey', allowImportMiddle, importController.addRelinKey);
+apiRouter.get("/allow", authMiddleware, importController.allowImport);
+apiRouter.get("/deny", authMiddleware, importController.denyImport);
+apiRouter.post(
+    "/contextAndPublicKey",
+    allowImportMiddle,
+    importController.addContextAndPk
+);
+apiRouter.post("/context", allowImportMiddle, importController.addContext);
+apiRouter.post("/publicKey", allowImportMiddle, importController.addPublicKey);
+apiRouter.post("/secretKey", allowImportMiddle, importController.addSecretKey);
+apiRouter.post("/relinKey", allowImportMiddle, importController.addRelinKey);
+apiRouter.post(
+    "/addPublicKeyAndDeviceID",
+    allowImportMiddle,
+    importController.addPublicKeyAndDeviceID
+);
 
-module.exports = { httpRouter, apiRouter }
+module.exports = { httpRouter, apiRouter };

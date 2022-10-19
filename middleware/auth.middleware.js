@@ -1,14 +1,13 @@
-const jwt = require('jsonwebtoken');
-const { TOKEN_KEY } = require('../config/express.js');
-
-
 module.exports = function auth(req, res, next) {
     if (req.session.user) {
         next();
     } else {
-        res.redirect('/login');
+        res.redirect('/auth/login');
     }
 }
+
+// const jwt = require('jsonwebtoken');
+// const { TOKEN_KEY } = require('../config/express.js');
 
 
 // below is auth with jwt token

@@ -6,6 +6,7 @@ const { startCountDown, endCountDown } = require("../util/countDown");
 const generateQRcode = require("../util/generateQRcode");
 const newPassword = require("../util/generatePassword");
 const getIPAddress = require("../util/getIPAddress");
+const PORT = require("../config/express").PORT;
 
 const RED = require("node-red");
 
@@ -22,9 +23,9 @@ const allowImport = async (req, res) => {
         const qrcodeDataJSON = {
             hostname: hostname,
             hostIP: getIPAddress(),
-            endPoint: "/import/addPublicKeyAndDeviceID",
+            endPoint: "/api/import/addPublicKeyAndDeviceID",
             oneTimePassword: shareData.oneTimePassword,
-            port: "8080",
+            port: `${PORT}`,
         };
 
         shareData.qrcode = await generateQRcode(qrcodeDataJSON);
@@ -252,6 +253,7 @@ const addRelinKey = async (req, res) => {
 const addPublicKeyAndDeviceID = async (req, res) => {
     try {
         const { publicKey, netpieDevice } = req.body;
+
         const flows = await RED.runtime.flows.getFlows({});
 
         flows.flows.push({
@@ -297,7 +299,7 @@ const addPublicKeyAndDeviceID = async (req, res) => {
             type: "publicKey",
             name: publicKeyName,
             originContextNode: "",
-            publicKeyBase64: publicKey,
+            importData: publicKey,
             isUpload: true,
         });
 

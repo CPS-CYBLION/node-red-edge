@@ -13,6 +13,11 @@ apiRouter.post(
     allowImportMiddle,
     importController.addContextAndPk
 );
+
+apiRouter.get("/test", (res, req) => {
+    req.send("fuck you");
+});
+
 apiRouter.post("/context", allowImportMiddle, importController.addContext);
 apiRouter.post("/publicKey", allowImportMiddle, importController.addPublicKey);
 apiRouter.post("/secretKey", allowImportMiddle, importController.addSecretKey);

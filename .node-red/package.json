@@ -4,8 +4,6 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
-        "node-red-dashboard": "~3.2.0",
-        "node-red-node-smooth": "~0.1.2",
-        "node-red-node-sqlite": "~1.0.3"
+        "node-red-cipherflow": "~0.2.0"
     }
 }

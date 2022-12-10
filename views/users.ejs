@@ -18,8 +18,8 @@
 				class="flex-col min-w-max: w-96 mt-24 mb-16 text-2xl font-semibold font-serif"
 			>
 				<div class="flex flex-nowrap mb-5">
-					<h1 class="w-1/2">Edge Name&nbsp;&nbsp;&nbsp;:</h1>
-					<h1 class="w-1/2 font-medium">Cipherflow Edge</h1>
+					<!-- <h1 class="w-1/2">Edge Name&nbsp;&nbsp;&nbsp;:</h1>
+					<h1 class="w-1/2 font-medium">Cipherflow Edge</h1> -->
 				</div>
 
 				<div class="flex flex-nowrap">
@@ -32,12 +32,12 @@
 				</div>
 			</div>
 			<div class="mb-3">
-				<button
+				<!-- <button
 					id="button-edgeName"
 					class="drop-shadow-xl bg-gray-50 px-3 py-2 border border-gray-200"
 				>
 					Change Edge Name
-				</button>
+				</button> -->
 			</div>
 			<div class="flex mb-16">
 				<button
@@ -129,7 +129,7 @@
 			</div>
 		</div>
 		<script>
-			const buttonEdgeName = document.getElementById("button-edgeName");
+			// const buttonEdgeName = document.getElementById("button-edgeName");
 			const buttonUsername = document.getElementById("button-username");
 			const buttonUserPassword = document.getElementById(
 				"button-userPassword"
@@ -148,11 +148,11 @@
 				"button-applyUserPassword"
 			);
 
-			buttonEdgeName.onclick = () => {
-				formEdgeName.classList.remove("hidden");
-				formUsername.classList.add("hidden");
-				fromUserPassword.classList.add("hidden");
-			};
+			// buttonEdgeName.onclick = () => {
+			// 	formEdgeName.classList.remove("hidden");
+			// 	formUsername.classList.add("hidden");
+			// 	fromUserPassword.classList.add("hidden");
+			// };
 
 			buttonUsername.onclick = () => {
 				formEdgeName.classList.add("hidden");
